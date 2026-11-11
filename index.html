@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#8c5266">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mes cycles">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Mes cycles — tracker menstruel</title>
+<style>
+:root{color-scheme:light;--ink:#382b32;--muted:#796b72;--bg:#fbf7f8;--card:#fff;--line:#eadde2;--accent:#8c5266;--soft:#f4e9ee;--pink:#c78da2}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+main{max-width:650px;margin:auto;padding:18px 16px 36px}.top{display:flex;justify-content:space-between;align-items:center;margin:8px 0 18px}.eyebrow{font-size:11px;letter-spacing:.13em;color:var(--muted);font-weight:700}.top h1{font-size:25px;margin:4px 0 0}.local{font-size:11px;background:var(--soft);padding:7px 10px;border-radius:20px;color:var(--accent);font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}.stat span{font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:25px;margin:5px 0 1px;letter-spacing:-.7px}.stat small{font-size:11px;color:var(--muted)}
+.pred{margin:12px 0 16px;background:#f4e9ee;border:1px solid #ead6df;border-radius:16px;padding:16px}.pred h2{font-size:15px;margin:0 0 9px}.pred .date{font-size:21px;font-weight:750}.pred p{font-size:13px;line-height:1.45;margin:7px 0 0;color:#715c66}
+nav{display:flex;gap:7px;overflow:auto;padding:2px 0 12px;margin-bottom:4px}nav button{white-space:nowrap;border:1px solid var(--line);background:white;border-radius:22px;padding:9px 13px;color:var(--ink);font-weight:650;font-size:13px}nav button.active{background:var(--accent);color:white;border-color:var(--accent)}
+h2.section{font-size:18px;margin:0 0 6px}.sub{font-size:13px;color:var(--muted);line-height:1.45;margin:0 0 14px}
+label{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}input,select,textarea{width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}textarea{resize:vertical;min-height:76px}button{font:inherit}.primary,.secondary,.danger{width:100%;border:0;border-radius:11px;padding:13px;font-weight:700;margin-top:12px}.primary{background:var(--accent);color:white}.secondary{background:var(--soft);color:var(--accent)}.danger{background:#f8e8e8;color:#8d3434}.hidden{display:none!important}.msg{font-size:13px;color:var(--accent);margin-top:8px;min-height:18px}
+.item{padding:13px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}.itemhead{display:flex;justify-content:space-between;gap:8px}.item strong{font-size:15px}.muted{color:var(--muted);font-size:12px;line-height:1.5}.actions{display:flex;gap:7px;margin-top:9px}.actions button{border:1px solid var(--line);background:white;border-radius:8px;padding:7px 10px;font-size:12px;color:var(--ink)}
+.barline{display:flex;align-items:center;gap:9px;margin:11px 0;font-size:12px}.bar{height:9px;background:#f0e7eb;border-radius:9px;overflow:hidden;flex:1}.bar i{display:block;height:100%;background:var(--pink);border-radius:9px}
+.notice{font-size:11px;color:var(--muted);line-height:1.5;margin-top:16px;text-align:center}.empty{font-size:13px;color:var(--muted);padding:16px 0}
+@media(min-width:560px){main{padding-top:28px}.grid{gap:12px}}
+</style>
+</head>
+<body>
+<main>
+ <header class="top"><div><div class="eyebrow">MON SUIVI PERSONNEL</div><h1>Mes cycles</h1></div><span class="local">Données locales</span></header>
+ <section class="grid" aria-label="Statistiques">
+  <div class="stat"><span>Durée moyenne</span><strong id="avg">—</strong><small>jours par cycle</small></div>
+  <div class="stat"><span>Durée médiane</span><strong id="med">—</strong><small>jours par cycle</small></div>
+  <div class="stat"><span>Durée des règles</span><strong id="periodAvg">—</strong><small>jours en moyenne</small></div>
+  <div class="stat"><span>Cycles enregistrés</span><strong id="count">0</strong><small>intervalles calculables</small></div>
+ </section>
+ <section class="pred"><h2>Prochaines règles estimées</h2><div id="prediction" class="muted">Ajoute tes dates de règles pour commencer.</div><p id="predictionDetail"></p></section>
+ <section class="pred" style="background:#f7f1e8;border-color:#eadfce"><h2>Ovulation et fenêtre fertile estimées</h2><div id="ovulation" class="muted">Ajoute au moins deux dates de début de règles pour obtenir une première estimation.</div><p id="ovulationDetail"></p></section>
+ <nav aria-label="Sections"><button class="active" data-tab="add">+ Nouveau cycle</button><button data-tab="history">Historique</button><button data-tab="stats">Statistiques</button><button data-tab="data">Sauvegarde</button></nav>
+ <section id="view-add" class="card">
+  <h2 class="section" id="formTitle">Enregistrer un cycle</h2><p class="sub">Le premier jour des règles correspond au jour 1 du cycle. La date de fin est facultative.</p>
+  <form id="cycleForm">
+   <label for="start">Premier jour des règles *</label><input id="start" type="date" required>
+   <label for="end">Dernier jour des règles</label><input id="end" type="date">
+   <label for="flow">Intensité du flux</label><select id="flow"><option value="">Non renseignée</option><option>Léger</option><option>Modéré</option><option>Abondant</option><option>Très abondant</option></select>
+   <label for="notes">Observations (facultatif)</label><textarea id="notes" placeholder="Douleurs, fatigue, humeur, symptômes…"></textarea>
+   <div id="formError" class="msg" role="status"></div><button class="primary" type="submit">Enregistrer le cycle</button>
+  </form>
+ </section>
+ <section id="view-history" class="card hidden"><h2 class="section">Historique des cycles</h2><p class="sub">Du plus récent au plus ancien.</p><div id="history"></div></section>
+ <section id="view-stats" class="card hidden"><h2 class="section">Analyse de tes cycles</h2><div id="statDetails" class="sub">Les statistiques apparaîtront après plusieurs enregistrements.</div><h3 style="font-size:14px;margin:18px 0 8px">Évolution des durées</h3><div id="chart"></div><p class="muted">Les intervalles anormalement courts ou longs restent visibles dans l'historique mais sont exclus des calculs automatiques.</p></section>
+ <section id="view-data" class="card hidden"><h2 class="section">Données et confidentialité</h2><p class="sub">Les données sont enregistrées dans le stockage de ce navigateur sur cet iPhone. Elles ne sont envoyées à aucun serveur par cette application. Exporte régulièrement une sauvegarde.</p><button id="export" class="secondary">Exporter mes données (JSON)</button><label for="importFile">Importer une sauvegarde JSON</label><input id="importFile" type="file" accept=".json,application/json"><p class="muted">L'importation remplace les données actuelles. Exporte-les avant si tu souhaites les conserver.</p><button id="clear" class="danger">Effacer toutes mes données</button><div id="dataMessage" class="msg" role="status"></div></section>
+ <p class="notice">Les dates d'ovulation et de fertilité sont des estimations calendaires, pas une mesure de l'ovulation réelle. Elles ne constituent pas une méthode de contraception et ne permettent pas d'exclure un risque de grossesse.</p>
+</main>
+<script>
+(()=>{
+'use strict';
+const KEY='mon-tracker-menstruel-v1';
+const $=id=>document.getElementById(id);
+let cycles=[],editing=null;
+try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(x))cycles=x.filter(c=>c&&typeof c.start==='string'&&validDate(c.start));}catch(e){}
+function validDate(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return false;const d=new Date(s+'T12:00:00');return !isNaN(d)&&d.toISOString().slice(0,10)===s}
+function date(s){return new Date(s+'T12:00:00')}
+function iso(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function add(s,n){let d=date(s);d.setDate(d.getDate()+n);return d}
+function diff(a,b){return Math.round((date(b)-date(a))/86400000)}
+function fmt(s){return new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'long',year:'numeric'}).format(date(s))}
+function median(a){if(!a.length)return null;let b=[...a].sort((x,y)=>x-y);return b.length%2?b[(b.length-1)/2]:(b[b.length/2-1]+b[b.length/2])/2}
+function mean(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:null}
+function round(n){return Math.round(n*10)/10}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(cycles));return true}catch(e){$('dataMessage').textContent="Le stockage est indisponible ou saturé. Exporte tes données si possible.";return false}}
+function ordered(){return [...cycles].sort((a,b)=>a.start.localeCompare(b.start))}
+function intervals(){let a=ordered();return a.slice(1).map((c,i)=>diff(a[i].start,c.start))}
+function validIntervals(){return intervals().filter(n=>n>=15&&n<=90)}
+function prediction(){
+ let a=ordered(),all=intervals();if(!a.length)return null;
+ let valid=all.filter(n=>n>=15&&n<=90),last=a[a.length-1];
+ if(!valid.length)return {last};
+ let recent=valid.slice(-6),m=median(recent),mad=median(recent.map(n=>Math.abs(n-m)))||0;
+ return {last,m,recent,spread:Math.max(2,Math.ceil(mad*1.5))};
+}
+function render(){
+ let a=ordered(),ints=validIntervals(),dur=cycles.filter(c=>c.end&&diff(c.start,c.end)>=0&&diff(c.start,c.end)<=30).map(c=>diff(c.start,c.end)+1),p=prediction();
+ $('avg').textContent=ints.length?round(mean(ints)):'—';$('med').textContent=ints.length?round(median(ints)):'—';$('periodAvg').textContent=dur.length?round(mean(dur)):'—';$('count').textContent=ints.length;
+ if(!p){$('prediction').textContent='Ajoute ton premier cycle pour commencer.';$('predictionDetail').textContent=''}
+ else if(!p.m){$('prediction').textContent='Dernier début enregistré : '+fmt(p.last.start);$('predictionDetail').textContent='Il faut au moins deux dates de début valides pour estimer le prochain cycle.'}
+ else{$('prediction').innerHTML='<div class="date">'+fmt(iso(add(p.last.start,Math.round(p.m))))+'</div><div class="muted">Date centrale estimée</div><div style="font-size:14px;margin-top:8px">Fenêtre indicative : '+fmt(iso(add(p.last.start,Math.round(p.m)-p.spread)))+' – '+fmt(iso(add(p.last.start,Math.round(p.m)+p.spread)))+'</div>';$('predictionDetail').textContent='Médiane des '+p.recent.length+' derniers intervalles valides : '+round(p.m)+' jours. Variabilité récente estimée : ±'+p.spread+' jours.'}
+ if(!p || !p.m){
+  $('ovulation').textContent='Il faut au moins deux dates de début de règles valides pour calculer une première estimation.';
+  $('ovulationDetail').textContent='L’estimation sera affinée au fil des cycles enregistrés.';
+ } else {
+  const nextStart=add(p.last.start,Math.round(p.m));
+  const ovulation=add(iso(nextStart),-14);
+  const fertileStart=add(iso(ovulation),-5);
+  const fertileEnd=add(iso(ovulation),1);
+  const possibleStart=add(iso(fertileStart),-p.spread);
+  const possibleEnd=add(iso(fertileEnd),p.spread);
+  $('ovulation').innerHTML='<div class="date">'+fmt(iso(ovulation))+'</div><div class="muted">Jour d’ovulation théorique</div><div style="font-size:14px;margin-top:8px"><b>Fenêtre fertile centrale :</b><br>'+fmt(iso(fertileStart))+' – '+fmt(iso(fertileEnd))+'</div><div style="font-size:12px;margin-top:8px;color:#715c66"><b>Plage élargie tenant compte de la variabilité des cycles :</b><br>'+fmt(iso(possibleStart))+' – '+fmt(iso(possibleEnd))+'</div>';
+  $('ovulationDetail').textContent='Calcul calendaire : ovulation supposée environ 14 jours avant les prochaines règles estimées. La fenêtre fertile affichée couvre les 5 jours précédents et le jour suivant. Estimation fondée sur '+p.recent.length+' intervalle(s) récent(s) valide(s) ; elle ne confirme pas qu’une ovulation aura lieu à ces dates.';
+ }
+ $('history').innerHTML=a.length?[...a].reverse().map(c=>{let i=a.indexOf(c),n=a[i+1]?diff(c.start,a[i+1].start):null;return `<article class="item"><div class="itemhead"><div><strong>${fmt(c.start)}</strong><div class="muted">Fin : ${c.end?fmt(c.end):'non renseignée'}</div><div class="muted">${n?'Cycle suivant : '+n+' jours':'Intervalle suivant non connu'}</div>${c.flow?'<div class="muted">Flux : '+esc(c.flow)+'</div>':''}${c.notes?'<div class="muted">'+esc(c.notes)+'</div>':''}</div></div><div class="actions"><button data-edit="${esc(c.id)}">Modifier</button><button data-delete="${esc(c.id)}">Supprimer</button></div></article>`}).join(''):'<div class="empty">Aucun cycle enregistré pour le moment.</div>';
+ $('statDetails').innerHTML=ints.length?`<p>Plus court : <b>${Math.min(...ints)} jours</b><br>Plus long : <b>${Math.max(...ints)} jours</b><br>Écart moyen à la médiane : <b>${round(mean(ints.map(n=>Math.abs(n-median(ints)))))} jours</b><br>Intervalles utilisés : <b>${ints.length}</b></p>`:'Enregistre au moins deux dates de début pour obtenir tes premières statistiques.';
+ let recent=ints.slice(-12);$('chart').innerHTML=recent.length?recent.map((n,i)=>`<div class="barline"><span style="width:58px;color:var(--muted)">Cycle ${ints.length-recent.length+i+1}</span><div class="bar"><i style="width:${Math.min(100,n/60*100)}%"></i></div><b>${n} j</b></div>`).join(''):'<p class="muted">Graphique disponible après deux cycles.</p>';
+}
+function tab(name){document.querySelectorAll('main>section[id^="view-"]').forEach(s=>s.classList.toggle('hidden',s.id!=='view-'+name));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===name))}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));
+$('cycleForm').addEventListener('submit',e=>{
+ e.preventDefault();let start=$('start').value,end=$('end').value;$('formError').textContent='';
+ if(!validDate(start))return $('formError').textContent='Indique une date de début valide.';
+ if(end&&(!validDate(end)||diff(start,end)<0))return $('formError').textContent='La date de fin doit être égale ou postérieure au début.';
+ if(end&&diff(start,end)>30)return $('formError').textContent='Vérifie la date de fin : plus de 31 jours.';
+ if(cycles.some(c=>c.start===start&&c.id!==editing))return $('formError').textContent='Un cycle est déjà enregistré à cette date.';
+ let c={id:editing||crypto.randomUUID(),start,end,flow:$('flow').value,notes:$('notes').value.trim()};
+ cycles=editing?cycles.map(x=>x.id===editing?c:x):[...cycles,c];if(!save())return;
+ editing=null;$('cycleForm').reset();$('formTitle').textContent='Enregistrer un cycle';$('formError').textContent='Cycle enregistré.';render();tab('history');
+});
+$('history').addEventListener('click',e=>{
+ let b=e.target.closest('button');if(!b)return;let c=cycles.find(x=>x.id===b.dataset.edit||x.id===b.dataset.delete);if(!c)return;
+ if(b.dataset.edit){editing=c.id;$('start').value=c.start;$('end').value=c.end||'';$('flow').value=c.flow||'';$('notes').value=c.notes||'';$('formTitle').textContent='Modifier un cycle';$('formError').textContent='';tab('add')}
+ if(b.dataset.delete&&confirm('Supprimer ce cycle ?')){cycles=cycles.filter(x=>x.id!==c.id);save();render()}
+});
+$('export').addEventListener('click',()=>{let blob=new Blob([JSON.stringify({format:'mon-tracker-menstruel',version:1,exportDate:new Date().toISOString(),cycles},null,2)],{type:'application/json'});let u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='mes-cycles-menstruels.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);$('dataMessage').textContent='Sauvegarde exportée.'});
+$('importFile').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;try{let o=JSON.parse(await f.text()),list=Array.isArray(o)?o:o.cycles;if(!Array.isArray(list)||!list.every(c=>c&&validDate(c.start)&&(!c.end||(validDate(c.end)&&diff(c.start,c.end)>=0&&diff(c.start,c.end)<=30))))throw Error();if(new Set(list.map(c=>c.start)).size!==list.length)throw Error();if(!confirm('Remplacer les données actuelles par '+list.length+' cycles ?'))return;cycles=list.map(c=>({id:c.id||crypto.randomUUID(),start:c.start,end:c.end||'',flow:c.flow||'',notes:c.notes||''}));if(save()){render();$('dataMessage').textContent='Importation réussie.'}}catch(err){$('dataMessage').textContent='Fichier invalide ou format non reconnu.'}e.target.value=''});
+$('clear').addEventListener('click',()=>{if(confirm('Effacer définitivement tous les cycles de cet iPhone ?')){cycles=[];save();render();$('dataMessage').textContent='Données effacées.'}});
+render();
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
+</script>
+</body></html>
